@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Christmas Tree - Final Star Fixed</title>
+    <title>Christmas Tree</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎄</text></svg>">
     <link rel="preload" href="./assets/models/hand_landmarker.task" as="fetch" crossorigin="anonymous">
     <link rel="preload" href="./assets/wasm/vision_wasm_internal.wasm" as="fetch" crossorigin="anonymous">
     <link rel="preload" href="./assets/wasm/vision_wasm_internal.js" as="script" crossorigin="anonymous">
@@ -156,6 +157,38 @@
         }
         .manager-title { color: #d4af37; font-size: 20px; font-family: 'Microsoft YaHei', serif; letter-spacing: 2px; }
 
+        /* --- 首次访问引导弹窗 (详细版) --- */
+        #welcome-modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95); z-index: 200;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            pointer-events: auto; opacity: 1; transition: opacity 0.5s ease;
+        }
+        #welcome-modal.fade-out { opacity: 0; pointer-events: none; }
+        .welcome-content {
+            text-align: left; color: #d4af37; font-family: 'Microsoft YaHei', sans-serif;
+            border: 1px solid rgba(212, 175, 55, 0.3); padding: 30px; border-radius: 8px;
+            background: rgba(10, 10, 10, 0.85); backdrop-filter: blur(10px);
+            width: 450px; max-width: 90%; box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+        .welcome-title { 
+            font-size: 26px; margin-bottom: 25px; letter-spacing: 2px; font-weight: bold; 
+            text-align: center; color: #fceea7; text-shadow: 0 0 10px rgba(212,175,55,0.3);
+        }
+        .guide-section { margin-bottom: 20px; }
+        .section-title { font-size: 14px; color: #888; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px; padding-bottom: 5px; }
+        .guide-step { margin-bottom: 12px; display: flex; align-items: flex-start; }
+        .step-icon { font-size: 22px; margin-right: 15px; min-width: 30px; text-align: center; line-height: 1.2; }
+        .step-text { font-size: 14px; color: #ccc; line-height: 1.5; }
+        .step-text strong { color: #fff; }
+        .start-btn {
+            margin-top: 10px; background: #d4af37; color: #000; border: none;
+            padding: 12px 30px; font-size: 16px; font-weight: bold; cursor: pointer;
+            border-radius: 4px; transition: 0.2s; width: 100%;
+        }
+        .start-btn:hover { background: #fceea7; transform: scale(1.02); box-shadow: 0 0 15px rgba(212,175,55,0.4); }
+        .permission-hint { font-size: 12px; color: #666; text-align: center; margin-top: 15px; }
+
         /* --- Loader --- */
         #loader {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -233,6 +266,48 @@
 <body>
 
     <div id="loader"><div class="spinner"></div><div class="loader-text">LOCAL MODE READY</div></div>
+
+    <div id="welcome-modal" class="hidden">
+        <div class="welcome-content">
+            <div class="welcome-title">🎄 魔法圣诞树使用指南 🎄</div>
+            
+            <div class="guide-section">
+                <div class="section-title">第一步：准备工作</div>
+                <div class="guide-step">
+                    <div class="step-icon">📷</div>
+                    <div class="step-text">请允许浏览器访问摄像头。请站在<b>距离摄像头 50-80cm</b> 的位置，并确保环境光线充足。</div>
+                </div>
+            </div>
+
+            <div class="guide-section">
+                <div class="section-title">第二步：施展魔法 (单手操作)</div>
+                <div class="guide-step">
+                    <div class="step-icon">✊</div>
+                    <div class="step-text"><b>握紧拳头</b><br>召唤所有粒子凝聚成圣诞树。</div>
+                </div>
+                <div class="guide-step">
+                    <div class="step-icon">✋</div>
+                    <div class="step-text"><b>张开手掌 & 左右移动</b><br>让星尘散开，此时<b>左右挥动</b>手掌可以旋转视角，寻找想要的照片。</div>
+                </div>
+                <div class="guide-step">
+                    <div class="step-icon">👌</div>
+                    <div class="step-text"><b>捏合手指 (抓取)</b><br>将想看的照片<b>转到屏幕中间</b>，捏合拇指食指即可抓取。</div>
+                </div>
+            </div>
+
+            <div class="guide-section">
+                <div class="section-title">第三步：个性化</div>
+                <div class="guide-step">
+                    <div class="step-icon">🎵</div>
+                    <div class="step-text">左下角可<b>添加你喜欢的照片</b>和<b>背景音乐</b>。</div>
+                </div>
+            </div>
+
+            <button class="start-btn" onclick="closeWelcome()">✨ 开始魔法体验 ✨</button>
+            <div class="permission-hint">提示：所有数据仅在本地运行，不会上传服务器</div>
+        </div>
+    </div>
+
     <div id="canvas-container"></div>
 
     <div id="title-container">
@@ -299,15 +374,15 @@
 
         <div class="bottom-left-panel">
             <label class="elegant-btn">
-                + 照片
+                + 添加照片
                 <input type="file" id="file-input" multiple accept="image/*">
             </label>
             <button class="elegant-btn" onclick="openDeleteManager()">▣ 图库</button>
             <label class="elegant-btn" id="music-upload-label">
-                ♫ 音乐
+                ♫ 添加音乐
                 <input type="file" id="music-input" accept=".mp3,audio/mpeg">
             </label>
-            <button class="elegant-btn" id="toggle-cam-btn" onclick="toggleCameraDisplay()">📷 镜头</button>
+            <button class="elegant-btn" id="toggle-cam-btn" onclick="toggleCameraDisplay()">📷 隐藏摄像头</button>
         </div>
     </div>
     
@@ -382,6 +457,25 @@
         const DB_NAME = "GrandTreeDB_v16"; 
         let db;
 
+        // --- 引导弹窗逻辑 ---
+        window.checkWelcome = function() {
+            const hasSeen = localStorage.getItem('hasSeenChristmasGuide_v3'); // 更新key确保所有用户都能看到最新修正版
+            if (!hasSeen) {
+                document.getElementById('welcome-modal').classList.remove('hidden');
+            }
+        }
+
+        window.closeWelcome = function() {
+            const modal = document.getElementById('welcome-modal');
+            modal.classList.add('fade-out');
+            localStorage.setItem('hasSeenChristmasGuide_v3', 'true');
+            // 尝试解锁音频上下文
+            if (bgmAudio.context && bgmAudio.context.state === 'suspended') {
+                bgmAudio.context.resume();
+            }
+            setTimeout(() => { modal.classList.add('hidden'); }, 500);
+        }
+
         function initDB() {
             return new Promise((resolve) => {
                 const request = indexedDB.open(DB_NAME, 1);
@@ -439,13 +533,16 @@
             createParticles(); 
             createDust();
             createSnow(); 
-            createDefaultPhotos();
+            createDefaultPhotos(); 
             setupPostProcessing();
             setupEvents();
             animate();
 
             const loader = document.getElementById('loader');
             if(loader) { loader.style.opacity = 0; setTimeout(() => loader.remove(), 500); }
+
+            // 检查引导弹窗
+            checkWelcome();
 
             try {
                 await initDB();
@@ -526,7 +623,16 @@
         window.toggleCameraDisplay = function() {
             STATE.cameraVisible = !STATE.cameraVisible;
             const cam = document.getElementById('webcam-wrapper');
-            if(STATE.cameraVisible) cam.classList.remove('camera-hidden'); else cam.classList.add('camera-hidden');
+            const btn = document.getElementById('toggle-cam-btn');
+            if(STATE.cameraVisible) {
+                 cam.classList.add('camera-hidden'); 
+                 btn.innerText = "📷 显示摄像头";
+                 STATE.cameraVisible = false;
+            } else { 
+                 cam.classList.remove('camera-hidden');
+                 btn.innerText = "📷 隐藏摄像头";
+                 STATE.cameraVisible = true;
+            }
         }
 
         window.toggleFullScreen = function() {
@@ -619,7 +725,7 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             renderer.toneMapping = THREE.ReinhardToneMapping; 
-            renderer.toneMappingExposure = 2.2; 
+            renderer.toneMappingExposure = 2.0; 
             container.appendChild(renderer.domElement);
             mainGroup = new THREE.Group();
             scene.add(mainGroup);
@@ -869,6 +975,13 @@
 
             snowSystem = new THREE.Points(snowGeo, material);
             scene.add(snowSystem);
+
+            // === 核心修改：预热 20 秒，让雪花提前落地 ===
+            const preWarmTime = 20.0; 
+            const step = 0.1; // 每次模拟 0.1 秒
+            for (let t = 0; t < preWarmTime; t += step) {
+                updateSnow(step);
+            }
         }
 
         // === 更新雪花逻辑 ===
@@ -915,6 +1028,7 @@
             createPhotoTexture(canvas.toDataURL(), 'default');
         }
 
+        // === 关键修改：计算图片比例 ===
         function createPhotoTexture(base64, id) {
             const img = new Image();
             img.src = base64;
@@ -922,18 +1036,29 @@
                 const tex = new THREE.Texture(img);
                 tex.colorSpace = THREE.SRGBColorSpace;
                 tex.needsUpdate = true;
-                addPhotoToScene(tex, id, base64);
+                // 计算比例：宽度 / 高度
+                const aspect = img.width / img.height;
+                addPhotoToScene(tex, id, base64, aspect);
             }
         }
 
-        function addPhotoToScene(texture, id, base64) {
-            const frameGeo = new THREE.BoxGeometry(1.4, 1.4, 0.05);
+        // === 关键修改：根据比例动态调整尺寸 + 降低亮度防止过曝 ===
+        function addPhotoToScene(texture, id, base64, aspect = 1) {
+            const maxSize = 1.2; 
+            let w, h;
+
+            if (aspect > 1) { w = maxSize; h = maxSize / aspect; } else { h = maxSize; w = maxSize * aspect; }
+
+            const framePadding = 0.2; 
+            const frameGeo = new THREE.BoxGeometry(w + framePadding, h + framePadding, 0.05);
             const frameMat = new THREE.MeshStandardMaterial({ color: CONFIG.colors.champagneGold, metalness: 1.0, roughness: 0.1 });
             const frame = new THREE.Mesh(frameGeo, frameMat);
-            const photoGeo = new THREE.PlaneGeometry(1.2, 1.2);
-            const photoMat = new THREE.MeshBasicMaterial({ map: texture });
+
+            const photoGeo = new THREE.PlaneGeometry(w, h);
+            const photoMat = new THREE.MeshBasicMaterial({ map: texture, color: 0xbbbbbb });
             const photo = new THREE.Mesh(photoGeo, photoMat);
             photo.position.z = 0.04;
+
             const group = new THREE.Group();
             group.add(frame); group.add(photo);
             const s = 0.8; group.scale.set(s,s,s);
