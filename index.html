@@ -3,32 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Christmas Tree - Final Star Fixed</title>
-    <link rel="preload" href="./assets/models/hand_landmarker.task" as="fetch" crossorigin="anonymous">
-    <link rel="preload" href="./assets/wasm/vision_wasm_internal.wasm" as="fetch" crossorigin="anonymous">
-    <link rel="preload" href="./assets/wasm/vision_wasm_internal.js" as="script" crossorigin="anonymous">
-    <link rel="preload" href="./assets/fonts/MaShanZheng.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-    <link rel="preload" href="./assets/fonts/Cinzel.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <title>Christmas Tree - Final</title>
+    
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/huaimni/ChristmasTreeV4@main/assets/models/hand_landmarker.task" as="fetch" crossorigin="anonymous">
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/huaimni/ChristmasTreeV4@main/assets/wasm/vision_wasm_internal.wasm" as="fetch" crossorigin="anonymous">
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/huaimni/ChristmasTreeV4@main/assets/wasm/vision_wasm_internal.js" as="script" crossorigin="anonymous">
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/huaimni/ChristmasTreeV4@main/assets/fonts/MaShanZheng.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
     <style>
-        /* --- 基础样式 --- */
+        /* 基础样式 */
         body { margin: 0; overflow: hidden; background-color: #000000; font-family: 'Songti SC', 'SimSun', serif; user-select: none; -webkit-user-select: none; }
         #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
         
-        /* --- 本地字体引入 --- */
-        @font-face { font-family: 'Ma Shan Zheng'; src: url('./assets/fonts/MaShanZheng.woff2') format('woff2'); font-weight: normal; font-style: normal; }
-        @font-face { font-family: 'Cinzel'; src: url('./assets/fonts/Cinzel.woff2') format('woff2'); font-weight: 700; font-style: normal; }
-        @font-face { font-family: 'Great Vibes'; src: url('./assets/fonts/GreatVibes.woff2') format('woff2'); font-weight: normal; font-style: normal; }
-        @font-face { font-family: 'Monoton'; src: url('./assets/fonts/Monoton.woff2') format('woff2'); font-weight: normal; font-style: normal; }
-        @font-face { font-family: 'Abril Fatface'; src: url('./assets/fonts/AbrilFatface.woff2') format('woff2'); font-weight: normal; font-style: normal; }
+        /* === 字体加速：指向 jsDelivr === */
+        @font-face { font-family: 'Ma Shan Zheng'; src: url('https://cdn.jsdelivr.net/gh/huaimni/ChristmasTreeV4@main/assets/fonts/MaShanZheng.woff2') format('woff2'); font-weight: normal; font-style: normal; }
+        @font-face { font-family: 'Cinzel'; src: url('https://cdn.jsdelivr.net/gh/huaimni/ChristmasTreeV4@main/assets/fonts/Cinzel.woff2') format('woff2'); font-weight: 700; font-style: normal; }
+        @font-face { font-family: 'Great Vibes'; src: url('https://cdn.jsdelivr.net/gh/huaimni/ChristmasTreeV4@main/assets/fonts/GreatVibes.woff2') format('woff2'); font-weight: normal; font-style: normal; }
+        @font-face { font-family: 'Monoton'; src: url('https://cdn.jsdelivr.net/gh/huaimni/ChristmasTreeV4@main/assets/fonts/Monoton.woff2') format('woff2'); font-weight: normal; font-style: normal; }
+        @font-face { font-family: 'Abril Fatface'; src: url('https://cdn.jsdelivr.net/gh/huaimni/ChristmasTreeV4@main/assets/fonts/AbrilFatface.woff2') format('woff2'); font-weight: normal; font-style: normal; }
 
-        /* --- UI 层通用 --- */
+        /* UI 样式 */
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
-        
-        /* 隐藏动画类 */
         .panel-hidden { opacity: 0 !important; pointer-events: none !important; transform: translateX(-20px); }
         .hidden { display: none !important; }
 
-        /* 按钮样式 */
         .elegant-btn {
             background: rgba(10, 10, 10, 0.85); border: 1px solid rgba(212, 175, 55, 0.4); 
             color: #d4af37; padding: 8px 12px; cursor: pointer; 
@@ -44,36 +42,31 @@
         .btn-red:hover { background: #922; color: #fff; }
         #play-pause-btn { width: 100%; margin-bottom: 6px; font-weight: bold; border-color: #d4af37; padding: 8px; }
 
-        /* --- 标题 (PC默认) --- */
         #title-container {
-            position: absolute; top: 10%; left: 50%; transform: translateX(-50%);
+            position: absolute; top: 15%; left: 50%; transform: translateX(-50%);
             text-align: center; pointer-events: auto; cursor: move; 
             z-index: 50; transition: color 0.2s; user-select: none; padding: 10px;
+            width: 90%;
         }
         .title-line { 
             margin: 0; transition: all 0.2s ease; white-space: nowrap;
             color: #fceea7; text-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
         }
 
-        /* --- 左侧侧边栏 (设置面板) --- */
         #left-sidebar {
             position: absolute; top: 20px; left: 20px; width: 200px;
             display: flex; flex-direction: column; gap: 10px;
             pointer-events: none; z-index: 20;
             max-height: 80vh;
         }
-
         .top-left-panel {
             pointer-events: auto; display: flex; flex-direction: column; gap: 6px; 
             background: rgba(5, 5, 5, 0.85); padding: 12px; border-radius: 4px;
             border: 1px solid rgba(212, 175, 55, 0.2); backdrop-filter: blur(8px);
             transition: all 0.4s ease; font-family: 'Microsoft YaHei', sans-serif;
             width: 100%; box-sizing: border-box;
-            overflow-y: auto; /* 内容过多可滚动 */
-            max-height: 60vh;
+            overflow-y: auto; max-height: 60vh;
         }
-        
-        /* 滚动条美化 */
         .top-left-panel::-webkit-scrollbar { width: 4px; }
         .top-left-panel::-webkit-scrollbar-track { background: transparent; }
         .top-left-panel::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 2px; }
@@ -90,7 +83,6 @@
         .slider { -webkit-appearance: none; width: 100%; height: 2px; background: rgba(255,255,255,0.15); outline: none; margin-top: 4px; }
         .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; background: #d4af37; border-radius: 50%; cursor: pointer; border: 1px solid #000; }
 
-        /* --- 手势交互指引 --- */
         .left-gesture-panel {
             pointer-events: none; opacity: 0.9; transition: all 0.4s ease;
             display: grid; grid-template-columns: 1fr 1fr;
@@ -104,7 +96,6 @@
         }
         .gesture-icon { font-size: 18px; margin-bottom: 2px; filter: drop-shadow(0 0 5px rgba(212,175,55,0.5)); }
 
-        /* --- 左下角：媒体管理 --- */
         .bottom-left-panel { 
             position: absolute; bottom: 20px; left: 20px; 
             pointer-events: auto; display: flex; flex-direction: column; gap: 6px; 
@@ -112,13 +103,12 @@
         }
         .bottom-left-panel .elegant-btn { width: 100%; margin: 0; }
 
-        /* --- 右上角：视图控制 --- */
         #top-right-controls { 
             position: absolute; top: 20px; right: 20px; 
-            pointer-events: auto; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; z-index: 100; 
+            pointer-events: auto; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; 
+            z-index: 100; 
         }
 
-        /* --- 摄像头 (PC默认位置) --- */
         #webcam-wrapper {
             position: absolute; bottom: 20px; right: 20px; 
             width: 180px; height: 135px;
@@ -134,7 +124,6 @@
             border-radius: 50%; box-shadow: 0 0 4px #ff0000; z-index: 30; transition: 0.2s;
         }
         
-        /* --- 删除弹窗 --- */
         #delete-manager {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); z-index: 60;
@@ -156,7 +145,6 @@
         }
         .manager-title { color: #d4af37; font-size: 20px; font-family: 'Microsoft YaHei', serif; letter-spacing: 2px; }
 
-        /* --- Loader --- */
         #loader {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: #050505; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -166,73 +154,39 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loader-text { color: #d4af37; font-size: 12px; letter-spacing: 3px; margin-top: 20px; font-family: 'Cinzel', serif; }
 
-        /* ========================================= */
-        /* === 核心适配代码：三端响应式 Media Queries === */
-        /* ========================================= */
-        
-        /* 针对手机/竖屏平板 (宽度小于 768px) */
         @media screen and (max-width: 768px) {
-            /* 1. 侧边栏调整 */
-            #left-sidebar {
-                top: 10px; left: 10px; width: 140px;
-                max-height: 55vh; 
-            }
+            #left-sidebar { top: 10px; left: 10px; width: 140px; max-height: 55vh; }
             .top-left-panel { padding: 8px; }
-            
-            /* 2. 手势面板 */
-            .left-gesture-panel {
-                grid-template-columns: 1fr; gap: 4px;
-            }
+            .left-gesture-panel { grid-template-columns: 1fr; gap: 4px; }
             .gesture-item { padding: 4px; flex-direction: row; gap: 5px;}
             .gesture-icon { font-size: 12px; margin-bottom: 0; }
             .gesture-text { font-size: 9px; }
-
-            /* 3. 底部媒体按钮 */
-            .bottom-left-panel {
-                bottom: 10px; left: 10px; width: 140px;
-                gap: 4px;
-            }
-
-            /* 4. 标题 */
-            #title-container {
-                top: 15%; 
-                width: 90%; 
-            }
+            .bottom-left-panel { bottom: 10px; left: 10px; width: 140px; gap: 4px; }
+            #title-container { top: 15%; width: 90%; }
             .title-line { font-size: 30px !important; }
-
-            /* 5. 摄像头：【关键修改】从顶部移到右下角，避免遮挡按钮 */
-            #webcam-wrapper {
-                width: 100px; height: 75px; 
-                top: auto; 
-                bottom: 120px; /* 放在右下角 */
-                right: 10px; 
-                opacity: 0.7; 
-            }
-            
-            /* 6. 右上角控制按钮 */
+            #webcam-wrapper { width: 100px; height: 75px; top: auto; bottom: 120px; right: 10px; opacity: 0.7; }
             #top-right-controls { top: 10px; right: 10px; }
             #top-right-controls .elegant-btn { padding: 4px 8px; font-size: 10px; min-width: 60px; }
         }
-
-        /* 针对超小屏幕 */
         @media screen and (max-height: 600px) {
              #left-sidebar { display: none; } 
              #toggle-ui-btn { display: block; }
         }
     </style>
+
 <script type="importmap">
     {
         "imports": {
-            "three": "https://registry.npmmirror.com/three/0.160.0/files/build/three.module.js",
-            "three/addons/": "https://registry.npmmirror.com/three/0.160.0/files/examples/jsm/",
-            "@mediapipe/tasks-vision": "./assets/vision_bundle.js"
+            "three": "https://cdn.jsdelivr.net/gh/huaimni/ChristmasTreeV4@main/assets/js/three/jsm/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/gh/huaimni/ChristmasTreeV4@main/assets/js/three/jsm/",
+            "@mediapipe/tasks-vision": "https://cdn.jsdelivr.net/gh/huaimni/ChristmasTreeV4@main/assets/js/vision_bundle.js"
         }
     }
 </script>
 </head>
 <body>
 
-    <div id="loader"><div class="spinner"></div><div class="loader-text">LOCAL MODE READY</div></div>
+    <div id="loader"><div class="spinner"></div><div class="loader-text">CONNECTING...</div></div>
     <div id="canvas-container"></div>
 
     <div id="title-container">
@@ -280,11 +234,11 @@
                 <div class="panel-header" style="margin-top:8px;">粒子设置</div>
                 <div class="control-row">
                     <span class="control-label">密度</span>
-                    <input type="range" min="500" max="3000" value="1500" class="slider" id="slider-tree">
+                    <input type="range" min="500" max="5000" value="4000" class="slider" id="slider-tree">
                 </div>
                 <div class="control-row">
                     <span class="control-label">星尘</span>
-                    <input type="range" min="500" max="5000" value="2500" class="slider" id="slider-dust">
+                    <input type="range" min="500" max="5000" value="3500" class="slider" id="slider-dust">
                 </div>
                 <button class="elegant-btn" style="width:100%; margin-top:5px;" onclick="applyParticleSettings()">⚡ 重建</button>
             </div>
@@ -312,7 +266,7 @@
     </div>
     
     <div id="gesture-hint" style="position: absolute; bottom: 10px; width: 100%; text-align: center; color: rgba(212,175,55,0.7); font-size: 10px; pointer-events: none; text-shadow: 0 0 5px #000; z-index: 5;">
-        正在加载本地模型...
+        正在连接 jsDelivr 加速...
     </div>
 
     <div id="webcam-wrapper">
@@ -340,16 +294,9 @@
 
         const CONFIG = {
             colors: { bg: 0x000000, champagneGold: 0xffd966, deepGreen: 0x03180a, accentRed: 0x990000 },
-            particles: { count: 1500, dustCount: 2500, treeHeight: 24, treeRadius: 8 },
-            // === 雪花配置 ===
-            snow: { 
-                count: 4000,      // 数量
-                range: 60,        // 散布范围
-                fallSpeed: 2.5,   // 下落速度
-                meltTime: 5.0     // 落地后停留时间
-            },
-            // ==================
-            camera: { z: 50 }, // 基础距离
+            particles: { count: 4000, dustCount: 3500, treeHeight: 24, treeRadius: 8 },
+            snow: { count: 4000, range: 60, fallSpeed: 2.5, meltTime: 5.0 },
+            camera: { z: 50 }, 
             interaction: { rotationSpeed: 1.4, grabRadius: 0.55 }
         };
 
@@ -361,12 +308,10 @@
             uiVisible: true, cameraVisible: true
         };
 
-        // 平滑手势数据
         const SMOOTH_HAND = { x: 0, y: 0 };
 
-        // === 雪花系统变量 ===
         let snowSystem, snowGeo;
-        const snowData = []; // 用于存储每个雪花的状态
+        const snowData = []; 
         const SNOW_FALLING = 0;
         const SNOW_LANDED = 1;
 
@@ -378,7 +323,6 @@
             'style5': { font: "'Abril Fatface', cursive", spacing: "0px", shadow: "0 5px 15px rgba(0,0,0,0.8)", transform: "none", weight: "normal" }
         };
 
-        // --- IndexedDB ---
         const DB_NAME = "GrandTreeDB_v16"; 
         let db;
 
@@ -450,27 +394,23 @@
             try {
                 await initDB();
                 loadTextConfig(); 
-                
                 const savedPhotos = await loadPhotosFromDB();
                 if(savedPhotos && savedPhotos.length > 0) {
                     photoMeshGroup.clear();
                     particleSystem = particleSystem.filter(p => p.type !== 'PHOTO');
                     savedPhotos.forEach(item => createPhotoTexture(item.data, item.id));
                 }
-
                 const savedMusic = await loadMusicFromDB();
                 if(savedMusic) {
                     bgmAudio.src = URL.createObjectURL(savedMusic);
                     updatePlayBtnUI(false); 
                 }
-
             } catch(e) { console.warn("Init Warning", e); }
 
             initMediaPipe(); 
             initDraggableTitle(); 
         }
 
-        // --- 核心优化：摄像机视野自适应 ---
         function adjustCamera() {
             if(!camera) return;
             const aspect = window.innerWidth / window.innerHeight;
@@ -976,12 +916,22 @@
                 }
             }
             try {
-                const vision = await FilesetResolver.forVisionTasks("./assets/wasm");
+                // === 核心修改：使用 jsDelivr CDN 加速 GitHub 资源 ===
+                // 指向你的 GitHub 仓库 main 分支
+                const vision = await FilesetResolver.forVisionTasks(
+                    "https://cdn.jsdelivr.net/gh/huaimni/ChristmasTreeV4@main/assets/wasm" 
+                );
+                
                 handLandmarker = await HandLandmarker.createFromOptions(vision, {
-                    baseOptions: { modelAssetPath: "./assets/models/hand_landmarker.task", delegate: "GPU" },
+                    baseOptions: { 
+                        // 模型文件也使用 CDN
+                        modelAssetPath: "https://cdn.jsdelivr.net/gh/huaimni/ChristmasTreeV4@main/assets/models/hand_landmarker.task", 
+                        delegate: "GPU" 
+                    },
                     runningMode: "VIDEO", numHands: 1
                 });
-                hint.innerText = "本地模型就绪";
+                
+                hint.innerText = "就绪 (CDN加速模式)";
                 predictWebcam();
             } catch(e) { console.warn("AI Load Failed:", e); hint.innerText = "AI Failed"; }
         }
